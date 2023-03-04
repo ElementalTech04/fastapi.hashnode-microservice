@@ -2,14 +2,23 @@ import json
 from os import environ
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import APIKeyHeader
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 from redis import Redis
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.requests import Request
 
 load_dotenv()
 
+api_key_header = APIKeyHeader(name='X-API-Key')
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 redis = Redis(host=environ.get("REDIS_CONN_HOST"), port=environ.get("REDIS_CONN_PORT"),
               password=environ.get("REDIS_CONN_PW"))
 
@@ -22,8 +31,16 @@ transport = RequestsHTTPTransport(
 client = Client(transport=transport, fetch_schema_from_transport=True)
 
 
-@app.get('/getPostsByTag/{tag}/{pageNum}')
-def get_posts_by_tag(tag: str, pageNum: int):
+# Define API key dependency
+def api_key_check(api_key: str = Depends(api_key_header)):
+    if api_key != environ.get("API_KEY"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid API key')
+    return api_key
+
+
+@app.get('/getPostsByTag/{tag}/{pageNum}', dependencies=[Depends(api_key_check)])
+@limiter.limit("20/minute")
+def get_posts_by_tag(request: Request, tag: str, pageNum: int):
     # Check Redis cache for tag
     cached_data = redis.get(tag)
     if cached_data:
@@ -50,6 +67,8 @@ def get_posts_by_tag(tag: str, pageNum: int):
     posts_by_user_result = client.execute(posts_by_user_query, variable_values=posts_by_user_params)
     print(posts_by_user_result['user']['publication']['posts'])
     posts_by_user_arr = posts_by_user_result['user']['publication']['posts']
+
+    # What will be returned to the client
     resulting_posts = []
 
     # Query GraphQL API for each post to see tags
@@ -86,7 +105,8 @@ def get_posts_by_tag(tag: str, pageNum: int):
     return resulting_posts
 
 
-@app.delete('/purge/{tag}')
-def purge_cache_by_tag(tag: str):
+@app.delete('/purge/{tag}', dependencies=[Depends(api_key_check)])
+@limiter.limit("30/minute")
+def purge_cache_by_tag(request: Request, tag: str):
     redis.delete(tag)
     return {'message': 'Cache purged successfully.'}
