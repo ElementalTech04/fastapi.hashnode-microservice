@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "fastapi-hashnode-api"
-version = "0.1.0"
-description = ""
+version = "1.0.2"
+description = "This API service provides the portfolio site UI with Hash Node blog posts from the SC Overlord"
 authors = ["Frankie Rodriguez <rfrankie@gmail.com>"]
 readme = "README.md"
 
