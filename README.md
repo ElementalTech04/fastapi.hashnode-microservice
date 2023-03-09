@@ -54,53 +54,22 @@ uvicorn app.main:app --host=0.0.0.0 --port=$PORT
 
 6. Open the URL provided by Railway to access the microservice.
 
-## Endpoints
+## Documentation
+To access the Swagger documentation in a FastAPI application, follow these steps:
 
-### GET /users/{username}
+1. Start your FastAPI application by running the command uvicorn main:app --reload in your terminal. Here, main refers to the name of your Python file and app refers to the name of your FastAPI application object.
 
-Retrieves information about a Hashnode user.
+2. Open a web browser and go to http://localhost:8000/docs. This will take you to the Swagger documentation page for your FastAPI application.
 
-Example response:
+3. The Swagger documentation page will display all the endpoints available in your FastAPI application. You can explore each endpoint by clicking on it.
 
-~~~
-{
-  "username": "travistech",
-  "name": "Travis Fischer",
-  "tagline": "Software Engineer | DevOps Enthusiast",
-  "photo": "https://cdn.hashnode.com/res/hashnode/image/upload/v1611804366165/8HABHpGZc.jpeg",
-  "num_followers": 14,
-  "num_following": 13,
-  "num_posts": 3,
-  "num_reactions": 70
-}
-~~~
+4. To try out an endpoint, click on the "Try it out" button on the right side of the endpoint. This will open a form where you can enter the input parameters and execute the endpoint.
 
-### GET /users/{username}/articles
+5. Once you have entered the input parameters, click on the "Execute" button. This will send a request to the endpoint and display the response below the input form.
 
-Retrieves a list of articles written by a Hashnode user.
+6. You can also view the API documentation in JSON format by going to http://localhost:8000/docs.json. This can be useful if you want to integrate your FastAPI application with other tools or services.
 
-Example response:
-
-```
-[
-  {
-    "title": "Building a Simple Blog with FastAPI and SQLite",
-    "slug": "building-a-simple-blog-with-fastapi-and-sqlite",
-    "cover_image": "https://cdn.hashnode.com/res/hashnode/image/upload/v1611877673504/LDvwVqrLn.png",
-    "brief": "Learn how to build a simple blog with FastAPI and SQLite.",
-    "date": "2021-01-28T20:00:00.000Z",
-    "num_reactions": 25
-  },
-  {
-    "title": "Deploying FastAPI Apps with Docker and Traefik",
-    "slug": "deploying-fastapi-apps-with-docker-and-traefik",
-    "cover_image": "https://cdn.hashnode.com/res/hashnode/image/upload/v1613234280390/hgGnDhJr2.png",
-    "brief": "Learn how to deploy FastAPI apps with Docker and Traefik.",
-    "date": "2021-02-13T20:00:00.000Z",
-    "num_reactions": 18
-  }
-]
-```
+7. Overall, using the Swagger documentation in a FastAPI application can be very helpful in understanding the available endpoints and testing them out.
 
 ## License
 
